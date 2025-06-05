@@ -1,9 +1,10 @@
+@description('A postfix to be used for all resource names in this deployment. This helps with creating a more uniform naming convention for resources.')
+param resourcesContextPostfix string
+
 param location string = resourceGroup().location
 
-var context = '-wn-nsp-session'
-
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
-  name: 'vnet${context}'
+  name: 'vnet${resourcesContextPostfix}'
   location: location
   properties: {
     addressSpace: {
@@ -37,7 +38,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
 }
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2021-02-01' = {
-  name: 'asp${context}'
+  name: 'asp${resourcesContextPostfix}'
   location: location
   sku: {
     name: 'B1'
@@ -49,12 +50,12 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2021-02-01' = {
   }
 }
 resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
-  name: 'uami${context}'
+  name: 'uami${resourcesContextPostfix}'
   location: location
 }
 
 resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
-  name: 'sql${context}'
+  name: 'sql${resourcesContextPostfix}'
   location: location
   properties: {
     version: '12.0'
@@ -69,7 +70,7 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   }
 
   resource sqlDatabase 'databases' = {
-    name: 'sqldb${context}'
+    name: 'sqldb${resourcesContextPostfix}'
     location: location
     properties: {
       collation: 'SQL_Latin1_General_CP1_CI_AS'
@@ -83,7 +84,7 @@ resource sqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
 }
 
 resource sqlPrivateEndpoint 'Microsoft.Network/privateEndpoints@2021-05-01' = {
-  name: 'pe-sql${context}'
+  name: 'pe-sql${resourcesContextPostfix}'
   location: location
   properties: {
     subnet: {
@@ -110,7 +111,7 @@ resource sqlPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
 
 resource sqlDnsZoneVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
   parent: sqlPrivateDnsZone
-  name: 'vnetlink-sql${context}'
+  name: 'vnetlink-sql${resourcesContextPostfix}'
   location: 'global'
   properties: {
     virtualNetwork: {
@@ -135,7 +136,7 @@ resource sqlPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZo
   }
 }
 resource webApp 'Microsoft.Web/sites@2021-02-01' = {
-  name: 'app-vnet${context}'
+  name: 'app-vnet${resourcesContextPostfix}'
   location: location
   identity: {
     type: 'UserAssigned'

@@ -1,3 +1,13 @@
+variables:
+- name: subscriptionId
+  value: 'TODO'
+- name: serviceConnectionName
+  value: 'TODO'
+- name: vnetResourcesContextPostfix
+  value: 'TODO' # for example: -vnet-nsp-session
+- name: nspResourcesContextPostfix
+  value: 'TODO' # for example: -nsp-session
+
 stages:
 - stage:
   displayName: Demo
@@ -20,10 +30,10 @@ stages:
       displayName: Deploy bicep Nsp
       inputs:
         deploymentScope: 'Resource Group'
-        azureResourceManagerConnection: 'Visual Studio Enterprise Subscription'
-        subscriptionId: 'b80b46ce-4fe0-4cca-990a-34df23c596e3'
+        azureResourceManagerConnection: '$(serviceConnectionName)'
+        subscriptionId: $(subscriptionId)
         action: 'Create Or Update Resource Group'
-        resourceGroupName: 'rg-wn-nsp-session'
+        resourceGroupName: 'rg$(nspResourcesContextPostfix)'
         location: 'Sweden Central'
         templateLocation: 'Linked artifact'
         csmFile: '$(Build.SourcesDirectory)/Deployment/nsp-main.bicep'
@@ -33,10 +43,10 @@ stages:
       displayName: Deploy bicep Vnet
       inputs:
         deploymentScope: 'Resource Group'
-        azureResourceManagerConnection: 'Visual Studio Enterprise Subscription'
-        subscriptionId: 'b80b46ce-4fe0-4cca-990a-34df23c596e3'
+        azureResourceManagerConnection: '$(serviceConnectionName)'
+        subscriptionId: $(subscriptionId)
         action: 'Create Or Update Resource Group'
-        resourceGroupName: 'rg-vnet-wn-nsp-session'
+        resourceGroupName: 'rg$(vnetResourcesContextPostfix)'
         location: 'Sweden Central'
         templateLocation: 'Linked artifact'
         csmFile: '$(Build.SourcesDirectory)/Deployment/vnet-main.bicep'
@@ -46,9 +56,9 @@ stages:
       displayName: Deploy Nsp API
       inputs:
         ConnectionType: 'AzureRM'
-        azureSubscription: 'Visual Studio Enterprise Subscription'
+        azureSubscription: '$(serviceConnectionName)'
         appType: 'webAppLinux'
-        WebAppName: 'app-wn-nsp-session'
+        WebAppName: 'app$(nspResourcesContextPostfix)'
         packageForLinux: '$(build.artifactstagingdirectory)/**/Sessions.Nsp.Api.zip'
         RuntimeStack: 'DOTNETCORE|8.0'
         StartupCommand: 'dotnet Sessions.Nsp.Api.dll'
@@ -58,9 +68,9 @@ stages:
       displayName: Deploy Vnet API
       inputs:
         ConnectionType: 'AzureRM'
-        azureSubscription: 'Visual Studio Enterprise Subscription'
+        azureSubscription: '$(serviceConnectionName)'
         appType: 'webAppLinux'
-        WebAppName: 'app-vnet-wn-nsp-session'
+        WebAppName: 'app$(vnetResourcesContextPostfix)'
         packageForLinux: '$(build.artifactstagingdirectory)/**/Sessions.Vnet.Api.zip'
         RuntimeStack: 'DOTNETCORE|8.0'
         StartupCommand: 'dotnet Sessions.Vnet.Api.dll'

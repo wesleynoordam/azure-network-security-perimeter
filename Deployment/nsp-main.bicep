@@ -1,10 +1,14 @@
-var resourceNamePostfix = '-wn-nsp-session'
+@description('A postfix to be used for all resource names in this deployment. This helps with creating a more uniform naming convention for resources.')
+param resourcesContextPostfix string
+
+param location string = resourceGroup().location
+
 var storageBlobDataReaderRoleId = '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1' // Storage Blob Data Reader
 var keyVaultSecretReaderRoleId = '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
-  name: 'asp${resourceNamePostfix}'
-  location: resourceGroup().location
+  name: 'asp${resourcesContextPostfix}'
+  location: location
   sku: {
     name: 'B1'
     tier: 'Basic'
@@ -15,8 +19,8 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   }
 }
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: 'appi${resourceNamePostfix}'
-  location: resourceGroup().location
+  name: 'appi${resourcesContextPostfix}'
+  location: location
   kind: 'web'
   properties: {
     Application_Type: 'web'
@@ -24,8 +28,8 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 
 resource appService 'Microsoft.Web/sites@2022-03-01' = {
-  name: 'app${resourceNamePostfix}'
-  location: resourceGroup().location
+  name: 'app${resourcesContextPostfix}'
+  location: location
   identity: {
     type: 'SystemAssigned'
   }
@@ -56,8 +60,8 @@ resource appServiceAppSettings 'Microsoft.Web/sites/config@2022-03-01' = {
 }
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: replace('sa${resourceNamePostfix}', '-', '')
-  location: resourceGroup().location
+  name: replace('sa${resourcesContextPostfix}', '-', '')
+  location: location
   sku: {
     name: 'Standard_LRS'
   }
@@ -87,8 +91,8 @@ resource appServiceBlobReaderRoleAssignment 'Microsoft.Authorization/roleAssignm
 }
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
-  name: 'kv${resourceNamePostfix}'
-  location: resourceGroup().location
+  name: 'kv${resourcesContextPostfix}'
+  location: location
   properties: {
     sku: {
       family: 'A'
@@ -117,8 +121,8 @@ resource appServiceSecretReaderRoleAssignment 'Microsoft.Authorization/roleAssig
 }
 
 resource nsp 'Microsoft.Network/networkSecurityPerimeters@2024-06-01-preview' = {
-  name: 'nsp${resourceNamePostfix}'
-  location: resourceGroup().location
+  name: 'nsp${resourcesContextPostfix}'
+  location: location
   properties: {}
 
   resource defaultProfile 'profiles' = {
@@ -165,8 +169,8 @@ resource nsp 'Microsoft.Network/networkSecurityPerimeters@2024-06-01-preview' = 
 }
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-02-01' = {
-  name: 'law${resourceNamePostfix}'
-  location: resourceGroup().location
+  name: 'law${resourcesContextPostfix}'
+  location: location
   properties: {
     sku: {
       name: 'PerGB2018'
