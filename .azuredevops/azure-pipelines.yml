@@ -1,0 +1,67 @@
+stages:
+- stage:
+  displayName: Demo
+  jobs:
+  - job: DeployDemo
+    displayName: Deploy Demo environment
+    steps:
+    - task: DotNetCoreCLI@2
+      displayName: Publish api zip
+      inputs:
+        command: publish
+        publishWebProjects: false
+        projects: |
+          $(Build.SourcesDirectory)/**/Sessions.Nsp.Api.csproj
+          $(Build.SourcesDirectory)/**/Sessions.Vnet.Api.csproj
+        arguments: -o $(build.artifactstagingdirectory) -c Release
+        zipAfterPublish: true
+
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: Deploy bicep Nsp
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: 'Visual Studio Enterprise Subscription'
+        subscriptionId: 'b80b46ce-4fe0-4cca-990a-34df23c596e3'
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: 'rg-wn-nsp-session'
+        location: 'Sweden Central'
+        templateLocation: 'Linked artifact'
+        csmFile: '$(Build.SourcesDirectory)/Deployment/nsp-main.bicep'
+        deploymentMode: 'Incremental'
+
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: Deploy bicep Vnet
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: 'Visual Studio Enterprise Subscription'
+        subscriptionId: 'b80b46ce-4fe0-4cca-990a-34df23c596e3'
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: 'rg-vnet-wn-nsp-session'
+        location: 'Sweden Central'
+        templateLocation: 'Linked artifact'
+        csmFile: '$(Build.SourcesDirectory)/Deployment/vnet-main.bicep'
+        deploymentMode: 'Incremental'
+    
+    - task: AzureRmWebAppDeployment@5
+      displayName: Deploy Nsp API
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'Visual Studio Enterprise Subscription'
+        appType: 'webAppLinux'
+        WebAppName: 'app-wn-nsp-session'
+        packageForLinux: '$(build.artifactstagingdirectory)/**/Sessions.Nsp.Api.zip'
+        RuntimeStack: 'DOTNETCORE|8.0'
+        StartupCommand: 'dotnet Sessions.Nsp.Api.dll'
+        DeploymentTypeLinux: 'oneDeploy'
+    
+    - task: AzureRmWebAppDeployment@5
+      displayName: Deploy Vnet API
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'Visual Studio Enterprise Subscription'
+        appType: 'webAppLinux'
+        WebAppName: 'app-vnet-wn-nsp-session'
+        packageForLinux: '$(build.artifactstagingdirectory)/**/Sessions.Vnet.Api.zip'
+        RuntimeStack: 'DOTNETCORE|8.0'
+        StartupCommand: 'dotnet Sessions.Vnet.Api.dll'
+        DeploymentTypeLinux: 'oneDeploy'
