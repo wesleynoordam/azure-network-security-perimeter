@@ -4,4 +4,4 @@ This repository contains resource for a Azure Network Security Perimeter session
   - A resource group with app service, storage account and keyvault with NSP
 - Powerpoint presentation
 
-To be able to deploy the code you should first adjust the variables in [azure-pipelines.yml](./azuredevops/azure-pipelines.yml)
+To be able to deploy the code you should first adjust the variables in [azure-pipelines.yml](./.azuredevops/azure-pipelines.yml)
